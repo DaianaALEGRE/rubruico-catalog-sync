@@ -1,4 +1,23 @@
+# Dependencias
 node_modules/
+
+# Variables de entorno
 .env
-data/
+.env.local
+
+# Logs
 logs/
+*.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# VS Code (opcional)
+.vscode/
+
+# Datos generados por el scraper
+data/
+
+# Cobertura de tests
+coverage/

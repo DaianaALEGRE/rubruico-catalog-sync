@@ -1,0 +1,54 @@
+
+name: Actualizar catálogo de LunariaStore
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  actualizar-catalogo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar scraper
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar scraper
+        run: node index.js
+
+      - name: Descargar LunariaStore
+        uses: actions/checkout@v4
+        with:
+          repository: DaianaALEGRE/LunariaStore
+          token: ${{ secrets.LUNARIA_TOKEN }}
+          path: LunariaStore
+
+      - name: Reemplazar catálogo
+        run: cp productos.json LunariaStore/src/data/productos.json
+
+      - name: Guardar cambios en LunariaStore
+        run: |
+          cd LunariaStore
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- src/data/productos.json; then
+            echo "El catálogo no cambió."
+            exit 0
+          fi
+
+          git add src/data/productos.json
+          git commit -m "chore: actualizar catálogo de productos"
+          git push

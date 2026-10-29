@@ -1,7 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const obtenerDescripcion = require("./detalleProducto");
-
+const fs = require("fs");
 
 function esperar(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -97,10 +97,10 @@ async function main() {
                     .replace(/\./g, "")
                     .replace(",", ".")
             );
-const margen = 1.35;
+const margen = 1.5;
 
 const precioVenta =
-    Math.ceil(costoTransferencia * margen / 100) * 100;
+    Math.ceil(costoPublicado * margen / 100) * 100;
 
 
             // PRODUCTO FINAL
@@ -141,9 +141,23 @@ const precioVenta =
     }
 
 
-    console.log(productos);
+    if (productos.length === 0) {
+        throw new Error(
+            "El scraper no encontró productos. No se guardará el catálogo."
+        );
+    }
 
+    fs.writeFileSync(
+        "productos.json",
+        JSON.stringify(productos, null, 2)
+    );
+
+    console.log(
+        `Catálogo guardado correctamente: ${productos.length} productos.`
+    );
 }
 
-
-main();
+main().catch((error) => {
+    console.error("Error al ejecutar el scraper:", error);
+    process.exitCode = 1;
+});
